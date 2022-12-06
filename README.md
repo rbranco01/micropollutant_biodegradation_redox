@@ -1,1 +1,5 @@
 # micropollutant_biodegradation_redox
+
+This is repository contains the analysis of micropollutant removal, microbial activity and microbial communities of an experiment studying micropollutant removal by two soil and two activated sludge communities. The dataset describes the temporal changes of micropollutant and electron acceptor concentrations and soil and activated sludge microbial communities under 5 different redox conditions (i.e. aerobic, nitrate reducing, iron reducing, sulfate reducing and methanogenic).
+Chemical input data were obtained with liquid chromatograph-mass spectrometer, gas chromatograph and ion chromatograph. The micropollutant removal efficiencies table and micropollutant and electron acceptor concentrations table were imported into R (in input_data/).
+Molecular biology input data were created by sequencing 16S rRNA gene amplicons using primers 515F and 926R on Illumina Miseq (300 bp PE). The feature table, taxonomic assignments, phylogeny and metadata were imported into R (in input_data/).

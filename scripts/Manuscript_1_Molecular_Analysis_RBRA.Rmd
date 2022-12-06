@@ -1,5 +1,5 @@
 ---
-title: "Influence of redox conditions and inoculum source on the micropollutants biodegradation by soil and activated sludge communities"
+title: "Manuscript_1_Molecular_Analysis_directory_RBRA"
 author: "Pieter van Veelen"
 date: "7/27/2021"
 output: html_document
@@ -309,13 +309,13 @@ amp_rarecurve(data = data,
   geom_vline(xintercept = 16905, size = 0.25)
 ```
 
-**Figure S3**. Rarefaction curves. Minimum coverage was 16905 reads per sample; a depth at which almost full diversity is captured. Hence, no samples were dropped in later stages.<br>
+**Figure S1**. Rarefaction curves. Minimum coverage was 16905 reads per sample; a depth at which almost full diversity is captured. Hence, no samples were dropped in later stages.<br>
 
 ### Alpha diversity
 
 Abundance-based metrics are ignored due to potential large influence of PCR bias. ASV richness (Chao1) is presented only, relying on taxon occurrences only.
 
-```{r alpha diversity , message=F, echo=T, eval=T, warning=T, include=T, cache=T, fig.width=4, fig.height=6}
+```{r alpha diversity inocula, message=F, echo=T, eval=T, warning=T, include=T, cache=T, fig.width=4, fig.height=3}
 # data rarefied to 16905 r/s
 set.seed(711)
 
@@ -332,6 +332,39 @@ alpha_data <-
 
 alpha_summary = alpha_data %>% group_by(combined) %>% summarise(mean_chao = mean(chao1), n = n())
 
+alpha_data_inoculum <- alpha_data %>% filter(str_detect(redox_type, 'inoculum'))
+
+# plot inocula alpha populations bars
+alpha_data_inoculum %>% 
+  ggplot(aes(x=sample_type, y=chao1)) +
+  stat_summary(fun = mean, geom = "bar", mapping = aes(fill = sample_type)) +
+  scale_fill_manual(values = c("#CA0020", "#F4A582", "#92C5DE", "#0571B0")) +
+  scale_shape_manual(values = c(17,0,1,4,5,6)) +
+  labs(y = "ASV richness (Chao1)", x= "Community type") +
+  theme_classic() +
+  theme(axis.text = element_text(size = 7, colour = "black"),
+        axis.ticks.x = element_line(size = 0.35),
+        axis.ticks.y = element_line(size = 0.35),
+        axis.text.x	= element_text(angle = 45, hjust = 1),
+        axis.title = element_text(size = 9),
+        axis.title.x = element_text(margin = margin(t = 7)),
+        axis.title.y = element_text(margin = margin(r = 7)),
+        axis.line = element_blank(),
+        legend.position = "none",
+        legend.text	= element_text(size = 7),
+        legend.title = element_text(size = 8),
+        legend.key.size = unit(10, "pt"),
+        strip.text = element_text(size = 8),
+        strip.background = element_blank(),
+        panel.spacing = unit(10, "pt"),
+        panel.border = element_rect(colour = "black", 
+                                    fill = NA, 
+                                    size = 0.5))
+```
+
+**Figure 4A**. Microbial community diversity across inocula and inocula-derived communities under different redox conditions. A) Alpha diversity expressed as estimated ASV richness (Chao1).<br>
+
+```{r alpha diversity full, message=F, echo=T, eval=T, warning=T, include=T, cache=T, fig.width=4, fig.height=6}
 # plot alpha populations bars
 alpha_data %>% 
   ggplot(aes(x=redox_type, y=chao1)) +
@@ -362,7 +395,7 @@ alpha_data %>%
                                     size = 0.5))
 ```
 
-**Figure 4A**. Microbial community diversity across inocula and inocula-derived communities under different redox conditions. A) Alpha diversity expressed as estimated ASV richness (Chao1). Bars represent mean values of technical extraction duplicates.<br>
+**Figure S6A**. Microbial community diversity across inocula and inocula-derived communities under different redox conditions. A) Alpha diversity expressed as estimated ASV richness (Chao1). Bars represent mean values of technical extraction duplicates.<br>
 
 ### Beta diversity
 
@@ -558,7 +591,7 @@ comp_inoc_uu <- all_dists %>%
 # plot Jaccard and unweighted UniFrac distances between inoculum and redox derived community
 comp = plot_grid(comp_inoc_jac + theme(legend.position = "none"),
                    comp_inoc_uu + theme(legend.position = "none"),
-                   labels  = c("E", "F"),
+                   labels  = c("B", "D"),
                    ncol = 2,
                    nrow = 1,
                    align = "hv")
@@ -568,7 +601,7 @@ legend_comp <- get_legend(comp_inoc_jac)
 plot_grid(comp, legend_comp, ncol=2, rel_widths = c(5, 1))
 ```
 
-**Figure 4D and 4E**. D) Jaccard and E) unweighted UniFrac distances between each inoculum and respective derived microbial communities under different redox conditions, this difference between D) and E) represents the phylogenetic clustering of the observed ASVs.<br>
+**Figure S6B and S6C**. B) Jaccard and C) unweighted UniFrac distances between each inoculum and respective derived microbial communities under different redox conditions, this difference between B) and C) represents the phylogenetic clustering of the observed ASVs.<br>
 
 ### Capscale analysis
 

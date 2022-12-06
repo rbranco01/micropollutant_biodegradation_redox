@@ -1,19 +1,16 @@
 ---
-title: "Article1"
+title: "Manuscript_1_Chemical_Analysis_directory_RBRA"
 author: "Rita H. R. Branco"
-date: "10/12/2021"
-output:
-  html_document:
-    toc: yes
-    toc_float: yes
-editor_options: 
-  chunk_output_type: console
+date: "7/27/2021"
+output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE) # global option that prevents code, errors and messages, but not the results from appearing in the finished file
+This is an R Markdown document contains an analysis of micropollutant removal and microbial activity of an experiment of Rita H.R. Branco.
 
-setwd("C:/Users/Rita/Documents/R/Article1") #set working directory
+## Install packages
+
+```{r import data, message=F, echo=T, eval=T, warning=F, include=T, cache=F}
+knitr::opts_chunk$set(echo = TRUE)
 
 options(scipen = 999) # tell R to avoid all scientific notation
 
@@ -39,15 +36,13 @@ library(cowplot)
 library(scales)
 ```
 
-This documents comprises the figures and main conclusions of the results and discussion section of the article *Micropollutants degradation potential and microbial community dynamics of soil and activated sludge cultures under five different redox conditions*.
-
 # 1. Loading, exploring and treating the data
 
 ## 1.1. Removal efficiency
 
 ### 1.1.1. Define the class of each column
-```{r warning=FALSE}
-heatmap_short <- read_excel("C:/Users/Rita/Documents/R/Article1/input_data/Article1_heatmap.xlsx", col_types = c("text", "text", "text", "text",
+```{r class of each column, message=F, echo=T, eval=T, warning=F, include=T, cache=F}
+heatmap_short <- read_excel("input_data/removal_efficiencies_manuscript_1.xlsx", col_types = c("text", "text", "text", "text",
                                                                "numeric", "numeric", "numeric",
                                                                "numeric", "numeric", "numeric",
                                                                "numeric", "numeric", "numeric",
@@ -58,13 +53,13 @@ heatmap_short <- read_excel("C:/Users/Rita/Documents/R/Article1/input_data/Artic
 ```
 
 ### 1.1.2. Creating a compound column and respective removal efficiency column
-```{r}
+```{r compound removal efficiency, message=F, echo=T, eval=T, warning=T, include=T, cache=F}
 heatmap_long = melt(heatmap_short, id.vars = c("SampleID", "RedoxCondition","Inoculum", "Respike"), 
                  variable.name = "Compound", value.name = "Removal_Efficiency")
 ```
 
 ### 1.1.3. Reordering data (reordering facets of facet plot using relevel function)
-```{r}
+```{r data reorder, message=F, echo=T, eval=T, warning=T, include=T, cache=F}
 heatmap_ordered <- heatmap_long
 heatmap_ordered$RedoxCondition <- factor(heatmap_ordered$RedoxCondition, levels = c("Aerobic", "Nitrate_red", "Iron_red", "Sulfate_red", "Methanogenic"))
 heatmap_ordered$Inoculum <- factor(heatmap_ordered$Inoculum, levels = c("Soil", "Mun_AS", "Ditch", "Ind_AS"))
@@ -73,7 +68,7 @@ heatmap_ordered$Compound <- factor(heatmap_ordered$Compound, levels = c("24_D", 
 ```
 
 ### 1.1.4. Reoordering y axis and creat new variables for removal efficiency
-```{r}
+```{r y axis reorder, message=F, echo=T, eval=T, warning=T, include=T, cache=F}
 round0 <- function(x) ifelse(abs(x) < 1, format(round(x, 2), nsmall = 1), ifelse(abs(x) < 10, format(round(x, 1), nsmall = 1), round(x, 0)))
 
 heatmap_final <- heatmap_ordered %>%
@@ -85,7 +80,7 @@ heatmap_final <- heatmap_ordered %>%
 ```
 
 ### 1.1.5. Separating before and after re-spiking
-```{r}
+```{r separate before and after, message=F, echo=T, eval=T, warning=T, include=T, cache=F}
 heatmap_before <- heatmap_final %>%
   filter(Respike == "Before") %>%
   select(!Respike)
@@ -98,8 +93,8 @@ heatmap_after <- heatmap_final %>%
 ## 1.2. Consumption/production data
 
 ### 1.2.1. Define the class of each column
-```{r warning=FALSE}
-data_short <- read_excel("C:/Users/Rita/Documents/R/Article1/input_data/Article1_graphs.xlsx", col_types = c("text", "text", "text", "text",
+```{r column class, message=F, echo=T, eval=T, warning=F, include=T, cache=F}
+data_short <- read_excel("input_data/consumption_data_manuscript_1.xlsx", col_types = c("text", "text", "text", "text",
                                                                "numeric", "numeric", "numeric",
                                                                "numeric", "numeric", "numeric",
                                                                "numeric", "numeric", "numeric",
@@ -122,18 +117,18 @@ data_short <- read_excel("C:/Users/Rita/Documents/R/Article1/input_data/Article1
 ```
 
 ### 1.2.2. Creating a compound column and respective concentration column
-```{r}
+```{r concentration column, message=F, echo=T, eval=T, warning=T, include=T, cache=F}
 data_long_NA = melt(data_short, id.vars = c("SampleID", "RedoxCondition","Inoculum", "Respike", "Time"), 
                  variable.name = "Compound", value.name = "Concentration")
 ```
 
 ### 1.2.3. Removing NA data
-```{r}
+```{r NA removal, message=F, echo=T, eval=T, warning=T, include=T, cache=F}
 data_long <- na.omit(data_long_NA)
 ```
 
 ### 1.2.4. Reordering data (reordering facets of facet plot using relevel function)
-```{r}
+```{r reorder, message=F, echo=T, eval=T, warning=T, include=T, cache=F}
 data_ordered <- data_long
 data_ordered$RedoxCondition <- factor(data_ordered$RedoxCondition, levels = c("Aerobic", "Nitrate_red", "Iron_red", "Sulfate_red", "Methanogenic"))
 data_ordered$Inoculum <- factor(data_ordered$Inoculum, levels = c("Soil", "Mun_AS", "Ditch", "Ind_AS"))
@@ -142,7 +137,7 @@ data_ordered$Compound <- factor(data_ordered$Compound, levels = c("24_D", "MCPP"
 ```
 
 ### 1.2.5. Keeping only micropollutants in compound column
-```{r}
+```{r keep MP column, message=F, echo=T, eval=T, warning=T, include=T, cache=F}
 #micropollutants removed before re-spiking
 data_micropol_b <- data_ordered %>% filter(!Compound == "DOC", 
                                          !Compound == "Sulfate",
@@ -204,7 +199,7 @@ data_micropol_select_ba <- data_micropol_ba %>% filter (
 ```
 
 ### 1.2.6. Keeping micropollutants per redox condition
-```{r}
+```{r MP per redox, message=F, echo=T, eval=T, warning=T, include=T, cache=F}
 #micropollutants removed before re-spiking 
 data_micropol_aerobic <- data_micropol_select_b %>% filter (RedoxCondition == "Aerobic")
 data_micropol_nitrate <- data_micropol_select_b %>% filter (RedoxCondition == "Nitrate_red")
@@ -221,7 +216,7 @@ data_micropol_methanogenic_ba <- data_micropol_select_ba %>% filter (RedoxCondit
 ```
 
 ### 1.2.7. Keeping micropollutants per inoculum
-```{r}
+```{r MP per inoculum, message=F, echo=T, eval=T, warning=T, include=T, cache=F}
 #micropollutants removed before re-spiking 
 data_micropol_ditch <- data_micropol_select_b %>% filter (Inoculum == "Ditch")
 data_micropol_soil <- data_micropol_select_b %>% filter (Inoculum == "Soil")
@@ -236,7 +231,7 @@ data_micropol_munAS_ba <- data_micropol_select_ba %>% filter (Inoculum == "Mun_A
 ```
 
 ### 1.2.8. Keeping only electron acceptor and products
-```{r}
+```{r keep electron acceptor, message=F, echo=T, eval=T, warning=T, include=T, cache=F}
 data_electron <- data_ordered %>% filter(Compound == "Sulfate"
                                          | Compound == "Nitrite" 
                                          | Compound == "Nitrate" 
@@ -263,59 +258,12 @@ data_sulfate_sulfate <- data_ordered %>% filter (Compound == "Sulfate" & RedoxCo
 data_methanogen_methane <- data_ordered %>% filter (Compound == "Methane" & RedoxCondition == "Methanogenic")
 ```
 
-## 1.3. Chloridazon and metabolites
-
 # 2. Results and Discussion
 
 ## 2.1. Overview
 
-### 2.1.1. Before VS After re-spiking
-```{r}
-# display.brewer.pal(n = 8, name = 'RdBu')
-# brewer.pal(n = 8, name = "RdBu")
-#dev.new(width = 8, height = 6, noRStudioGD = TRUE)
-
-ggplot(data = heatmap_final, aes(x = RedoxCondition, y = Compound, fill = RemovalEfficiency)) +
-  geom_tile(colour = "white", size = 0.2) +
-  facet_nested(Respike ~ Inoculum) +
-  scale_y_discrete(expand = c(0,0)) +
-  scale_x_discrete(expand = c(0,0)) +
-  scale_fill_manual(values = c("#D6604D", "#F4A582", "#FDDBC7", "#F7F7F7", "#D1E5F0", "#92C5DE", "#4393C3"), limits = c("<=-90", "<=-60", "<=-30", ">-30 & <30", ">=30", ">=60", ">=90")) +
-  geom_text(aes(label = RemovalEf), size = 2.5) +
-  guides(fill = guide_legend(reverse = TRUE)) +
-  theme_classic() +
-  theme(axis.text = element_text(size = 7, colour = "black"),
-        axis.ticks.x = element_line(size = 0.35),
-        axis.ticks.y = element_blank(),
-        axis.text.x	= element_text(angle = 45, hjust = 1),
-        axis.text.y	= element_text(vjust = 1, hjust = 1),
-        axis.title = element_text(size = 9),
-        axis.title.x = element_text(margin = margin(t = 7)),
-        axis.title.y = element_text(margin = margin(r = 7)),
-        axis.line = element_blank(),
-        legend.text	= element_text(size = 7),
-        legend.title = element_text(size = 8),
-        legend.key.size = unit(10, "pt"),
-        strip.text = element_text(size = 8),
-        strip.background = element_blank(),
-        panel.spacing = unit(5, "pt"),
-        panel.border = element_rect(colour = "black", 
-                                    fill = NA, 
-                                    size = 0.5),
-        plot.margin = margin(t = 5.5,
-                             r = 15,
-                             b = 5.5,
-                             l = 5.5))
-
-ggsave("C:/Users/Rita/Documents/R/Article1/figures/Figure1_Overview.pdf", width = 8, height = 6)
-```
-
-### 2.1.2. Before re-spiking
-```{r}
-#display.brewer.pal(n = 11, name = 'RdBu')
-#brewer.pal(n = 11, name = "RdBu")
-#dev.new(width = 8, height = 4, noRStudioGD = TRUE)
-
+### 2.1.1. Before 2nd spike (i.e. re-spiking)
+```{r before, message=F, echo=T, eval=T, warning=T, include=T, cache=F, fig.width=8, fig.height=4}
 ggplot(data = heatmap_before, aes(x = RedoxCondition, y = Compound, fill = RemovalEfficiency)) +
   geom_tile(colour = "white", size = 0.2) +
   facet_nested(~ Inoculum) +
@@ -347,16 +295,12 @@ ggplot(data = heatmap_before, aes(x = RedoxCondition, y = Compound, fill = Remov
                              r = 15,
                              b = 5.5,
                              l = 5.5))
-
-ggsave("C:/Users/Rita/Documents/R/Article1/figures/Figure1_1.pdf", width = 8, height = 4)
 ```
 
-### 2.1.3. After re-spiking
-```{r}
-#display.brewer.pal(n = 11, name = 'RdBu')
-#brewer.pal(n = 11, name = "RdBu")
-#dev.new(width = 8, height = 4, noRStudioGD = TRUE)
+**Figure 1**. Micropollutant removal efficiency for the different redox condition/community type combinations between the 1st and 2nd spike.<br>
 
+### 2.1.2. After 2nd spike (i.e. re-spiking)
+```{r after, message=F, echo=T, eval=T, warning=F, include=T, cache=F, fig.width=8, fig.height=4}
 ggplot(data = heatmap_after, aes(x = RedoxCondition, y = Compound, fill = RemovalEfficiency)) +
   geom_tile(colour = "white", size = 0.2) +
   facet_nested(~ Inoculum) +
@@ -388,19 +332,14 @@ ggplot(data = heatmap_after, aes(x = RedoxCondition, y = Compound, fill = Remova
                              r = 15,
                              b = 5.5,
                              l = 5.5))
-
-ggsave("C:/Users/Rita/Documents/R/Article1/figures/Figure1_2.pdf", width = 8, height = 4)
 ```
+
+**Figure 2**. Micropollutant removal efficiency for the different redox condition/community type combinations 75 days after the 2nd spike.<br>
 
 ## 2.2. Removal rates
 
 ### 2.2.1. Micropollutants removed before re-spiking
-```{r}
-display.brewer.pal(n = 6, name = 'RdBu')
-brewer.pal(n = 6, name = "RdBu")
-#scale_fill_brewer(type = "seq", palette = "RdBu")
-#dev.new(width = 6, height = 8, noRStudioGD = TRUE)
-
+```{r MP before, message=F, echo=T, eval=T, warning=T, include=T, cache=F, fig.width=6, fig.height=8}
 breakscompounds_1 <- c("24_D", "MCPP", "CLZ", "CLZ_DP", "CLZ_MDP", "MET", "MET_ESA", "MET_OA", "BTZ", "ANP", "CBZ", "GAB", "ACK", "1H_BTR")
 valuesfill_1 <- c("#B2182B", "#EF8A62", "#FDDBC7", "#D1E5F0", "#67A9CF", "#2166AC", "#B2182B", "#EF8A62", "#FDDBC7", "#D1E5F0", "#67A9CF", "#2166AC", "#B2182B", "#EF8A62")
 valuesshape_1 <- c(21, 21, 21, 21, 21, 21, 22, 22, 22, 22, 22, 22, 23, 23)
@@ -445,17 +384,12 @@ ggplot(data = data_micropol_select_b, mapping = aes(x = Time,
                                     size = 0.5),
         panel.grid.major = element_line(colour = "grey87",
                                         size = 0.15))
-
-ggsave("C:/Users/Rita/Documents/R/Article1/figures/Figure1_S1.pdf", width = 6, height = 8)
 ```
 
-### 2.2.2. Micropollutants removed both before and after re-spiking
-```{r}
-#display.brewer.pal(n = 10, name = 'RdBu')
-#brewer.pal(n = 10, name = "RdBu")
-#scale_fill_brewer(type = "seq", palette = "RdBu")
-#dev.new(width = 6, height = 8, noRStudioGD = TRUE)
+**Figure S2**. Degradation curves of micropollutants removed during the 1st spike for each redox conditions and microbial community combination.<br>
 
+### 2.2.2. Micropollutants removed both before and after re-spiking
+```{r MP before and after, message=F, echo=T, eval=T, warning=T, include=T, cache=F, fig.width=6, fig.height=8}
 breakscompounds_2 <- c("24_D", "MCPP", "CLZ", "CLZ_DP", "CLZ_MDP", "MET", "ANP", "CBZ", "ACK", "1H_BTR")
 valuesfill_2 <- c("#B2182B", "#EF8A62", "#FDDBC7", "#D1E5F0", "#67A9CF", "#2166AC", "#D1E5F0", "#67A9CF", "#B2182B", "#EF8A62")
 valuesshape_2 <- c(21, 21, 21, 21, 21, 21, 22, 22, 23, 23)
@@ -500,17 +434,14 @@ ggplot(data = data_micropol_select_ba, mapping = aes(x = Time,
                                     size = 0.5),
         panel.grid.major = element_line(colour = "grey87",
                                         size = 0.15))
-
-ggsave("C:/Users/Rita/Documents/R/Article1/figures/Figure1_S2.pdf", width = 6, height = 8)
 ```
+
+**Figure 3**. Degradation curves of micropollutants removed after both the 1st and the 2nd spike for each redox conditions and microbial community combination.<br>
 
 ### 2.2.3. Microbial activity
 
 #### 2.2.3.1. Aerobic
-```{r}
-#display.brewer.pal(n = 4, name = 'RdBu')
-#brewer.pal(n = 4, name = "RdBu")
-#scale_fill_brewer(type = "seq", palette = "RdBu")
+```{r aerobic activity, message=F, echo=T, eval=T, warning=T, include=T, cache=F}
 breaksinoculum_1 <- c("Soil", "Mun_AS", "Ditch", "Ind_AS")
 valuesfill_4 <- c("#CA0020", "#F4A582", "#92C5DE", "#0571B0")
 
@@ -688,7 +619,7 @@ an <- ggplot(data = data_aerob_nitrate, mapping = aes(x = Time,
 ```
 
 #### 2.2.3.2. Nitrate reducing
-```{r}
+```{r nitrate red activity, message=F, echo=T, eval=T, warning=T, include=T, cache=F}
 nn <- ggplot(data = data_nitrate_nitrate, mapping = aes(x = Time, 
                                                         y = Concentration, 
                                                         colour = Inoculum, 
@@ -777,7 +708,7 @@ nc <- ggplot(data = data_nitrate_carbondiox, mapping = aes(x = Time,
 ```
 
 #### 2.2.3.3. Sulfate reducing
-```{r}
+```{r sulfate red activity, message=F, echo=T, eval=T, warning=T, include=T, cache=F}
 s <- ggplot(data = data_sulfate_sulfate, mapping = aes(x = Time, 
                                                        y = Concentration, 
                                                        colour = Inoculum, 
@@ -822,54 +753,8 @@ s <- ggplot(data = data_sulfate_sulfate, mapping = aes(x = Time,
                                         size = 0.15))
 ```
 
-#### 2.2.3.4. Methanogenic
-```{r}
-m <- ggplot(data = data_methanogen_methane, mapping = aes(x = Time, 
-                                                          y = Concentration, 
-                                                          colour = Inoculum, 
-                                                          fill = Inoculum, 
-                                                          shape = Inoculum, 
-                                                          linetype = Inoculum)) + 
-  facet_nested(~ Compound + Respike) +
-  geom_line(colour = "black", 
-            size = 0.4) +
-  geom_point(colour = "black", 
-             shape = 21) + 
-  scale_fill_manual (breaks = breaksinoculum_1, 
-                     values = valuesfill_4) +
-  scale_linetype_manual(breaks = breaksinoculum_1, 
-                        values = c(1,1,1,1)) +
-  scale_x_continuous(limits = c(0, 131), 
-                     breaks = seq(0, 131, 15), 
-                     expand = c(0,0)) +
-  scale_y_continuous(limits = c(-0.0125, 0.5125), 
-                     breaks = seq(0, 0.5, 0.0625), 
-                     expand = c(0,0), 
-                     labels = label_number(accuracy = 0.1)) +
-  theme_classic() +
-  theme(axis.text = element_text(size = 7, colour = "black"),
-        axis.ticks = element_line(size = 0.25),
-        axis.title = element_text(size = 9),
-        axis.title.x = element_text(margin = margin(t = 7)),
-        axis.title.y = element_text(margin = margin(r = 7)),
-        axis.line = element_blank(),
-        legend.text	= element_text(size = 7),
-        legend.title = element_text(size = 8),
-        legend.key.width = unit(12, "pt"),
-        legend.key.height = unit(10, "pt"),
-        legend.position ="bottom",
-        strip.text = element_text(size = 8),
-        strip.background = element_blank(),
-        panel.spacing = unit(0, "pt"),
-        panel.border = element_rect(colour = "black", 
-                                    fill = NA, 
-                                    size = 0.5),
-        panel.grid.major = element_line(colour = "grey87",
-                                        size = 0.15))
-```
-
 #### 2.2.3.5. Global graph
-```{r}
+```{r overall activity, message=F, echo=T, eval=T, warning=T, include=T, cache=F, fig.width=8, fig.height=4}
 legend <- get_legend(s)
 
 row_1 <- plot_grid(ao + theme(legend.position="none"),
@@ -892,8 +777,7 @@ row_2 <- plot_grid(nn + theme(legend.position="none"),
                    axis = "l",
                    labels = c("B", "", "C", ""))
 
-#dev.new(width = 8, height = 4, noRStudioGD = TRUE)
 plot_grid (row_1, row_2, nrow = 2)
-
-ggsave("C:/Users/Rita/Documents/R/Article1/figures/Figure1_3.pdf", width = 8, height = 4)
 ```
+
+**Figure S3**. Cumulative consumption and production of different compounds per community type A) Consumption of oxygen and ammonium and production of carbon dioxide and nitrate under aerobic conditions; B) Consumption of nitrate and production of carbon dioxide under nitrate reducing conditions; C) Consumption of sulfate under sulfate reducing conditions.<br>
