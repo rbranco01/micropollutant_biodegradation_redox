@@ -1,0 +1,49 @@
+#!/bin/bash
+#SBATCH --job-name=RBRA_proj2_Q13921_16S_515F926R_20210701
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=16
+
+source activate ~/miniconda3/envs/qiime2-2019.10
+
+cd /export2/home/microlab/microlab/qiime/illumina_data
+
+ls [A-Z]*.fastq.gz > list_fastq_gz_files.txt
+
+mkdir -p /export2/home/microlab/microlab/qiime/illumina_data/temp
+export TMPDIR=/export2/home/microlab/microlab/qiime/illumina_data/temp
+
+mkdir -p RBRA_proj2_Q13921_16S_515F926R_20210701
+
+mkdir -p RBRA_proj2_Q13921_16S_515F926R_20210701/raw_data
+
+qiime
+
+cp -u RBRA_proj2_Q13921_16S_515F926R_20210701@*_R1_*.fastq.gz ./
+cp -u RBRA_proj2_Q13921_16S_515F926R_20210701@*_R2_*.fastq.gz ./
+cp -u RBRA_proj2_Q13921_16S_515F926R_20210701*_bash_step_*.sh ./
+gunzip -k ./RBRA_proj2_Q13921_16S_515F926R_20210701@*_R1_*.fastq.gz
+gunzip -k ./RBRA_proj2_Q13921_16S_515F926R_20210701@*_R2_*.fastq.gz
+cp /export2/home/microlab/microlab/python_scripts/qiime/qiime_pre_demux.py ./
+cp /export2/home/microlab/microlab/python_scripts/qiime/qiime2_subsampling_quality_check.py ./
+cp RBRA_proj2_Q13921_16S_515F926R_20210701@metadata.txt ./
+cd .
+python3.6 qiime_pre_demux.py
+cd ./raw_data/
+chmod -R 777 *.fastq
+head -40000 ./raw_data/forward.fastq > ./10kseq-RBRA_proj2_Q13921_16S_515F926R_20210701@sub_R1_sample.fastq
+head -40000 ./raw_data/reverse.fastq > ./10kseq-RBRA_proj2_Q13921_16S_515F926R_20210701@sub_R2_sample.fastq
+gzip -k ./10kseq-RBRA_proj2_Q13921_16S_515F926R_20210701@sub_R1_sample.fastq
+gzip -k ./10kseq-RBRA_proj2_Q13921_16S_515F926R_20210701@sub_R2_sample.fastq
+cp -u ./RBRA_proj2_Q13921_16S_515F926R_20210701@metadata.txt /export2/home/microlab/microlab/qiime/illumina_data/10kseq-RBRA_proj2_Q13921_16S_515F926R_20210701@metadata.txt
+cp -u ./*kseq-RBRA_proj2_Q13921_16S_515F926R_20210701@* /export2/home/microlab/microlab/qiime/illumina_data/
+gzip *.fastq
+cp -u ./raw_data/forward.fastq.gz ./RBRA_proj2_Q13921_16S_515F926R_20210701@clean_R1_seq.fastq.gz
+cp -u ./raw_data/reverse.fastq.gz ./RBRA_proj2_Q13921_16S_515F926R_20210701@clean_R2_seq.fastq.gz
+cd .
+chmod -R 777 *.fastq.gz
+python3.6 qiime2_subsampling_quality_check.py
+cd /export2/home/microlab/microlab/qiime/illumina_data
+
+
+source deactivate

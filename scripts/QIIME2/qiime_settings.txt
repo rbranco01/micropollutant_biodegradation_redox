@@ -1,0 +1,31 @@
+
+[qiime]
+path = /export2/home/microlab/microlab/qiime/illumina_data/
+
+size_subsample = 10000
+
+path_python = /export2/home/microlab/microlab/python_scripts/qiime/
+path_qiime = ~/miniconda3/envs/qiime2-2019.10 
+
+nodes = 1
+ntasks_per_node = 1
+cpus_per_task = 16
+qiime_version = qiime2-2019.10
+
+forward_barcodes_file = metadata.txt
+forward_barcodes_column = BarcodeSequence
+
+forward_primer = GTGYCAGCMGCCGCGGTAA
+reverse_primer = CCGYCAATTYMTTTRAGTTT
+
+trim_forward = 5
+trim_reverse = 5
+length_forward = 240
+length_reverse = 210
+
+min_depth = 100
+max_depth = 40000
+sampling_depth = 32939
+
+path_classifier = /export2/home/microlab/microlab/qiime_classifiers/
+classifier = NB_classifier_SILVA_132_99_16S_515F-926R_QIIME2-2019.10.qza

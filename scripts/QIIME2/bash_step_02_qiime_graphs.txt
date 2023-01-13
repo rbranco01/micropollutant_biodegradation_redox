@@ -1,0 +1,47 @@
+#!/bin/bash
+#SBATCH --job-name=RBRA_proj2_Q13921_16S_515F926R_20210701
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=16
+
+source activate ~/miniconda3/envs/qiime2-2019.10
+
+qiime
+
+cd /export2/home/microlab/microlab/qiime/illumina_data
+
+cp /export2/home/microlab/microlab/python_scripts/qiime/qiime_settings.ini ./qiime_settings.txt
+cp -u .*_bash_step_*.sh ./
+
+qiime diversity alpha-rarefaction \
+--i-table ./RBRA_proj2_Q13921_16S_515F926R_20210701_table.qza \
+--m-metadata-file ./RBRA_proj2_Q13921_16S_515F926R_20210701@metadata.txt \
+--o-visualization ./RBRA_proj2_Q13921_16S_515F926R_20210701_alpha_rarefaction_curves.qzv \
+--p-min-depth 100 \
+--p-max-depth 40000
+
+
+qiime diversity core-metrics-phylogenetic \
+--i-table ./RBRA_proj2_Q13921_16S_515F926R_20210701_table.qza \
+--i-phylogeny ./RBRA_proj2_Q13921_16S_515F926R_20210701_rooted-tree.qza \
+--m-metadata-file ./RBRA_proj2_Q13921_16S_515F926R_20210701@metadata.txt \
+--p-sampling-depth 32939 \
+--output-dir ./RBRA_proj2_Q13921_16S_515F926R_20210701_microbial-diversity-results
+
+
+qiime taxa barplot \
+--i-table ./RBRA_proj2_Q13921_16S_515F926R_20210701_table.qza \
+--i-taxonomy ./RBRA_proj2_Q13921_16S_515F926R_20210701_taxonomy_NB_classifier_SILVA_132_99_16S_515F-926R_QIIME2-2019.10.qza \
+--m-metadata-file ./RBRA_proj2_Q13921_16S_515F926R_20210701@metadata.txt \
+--o-visualization ./RBRA_proj2_Q13921_16S_515F926R_20210701_taxa_barplot.qzv
+
+
+mkdir ./RBRA_proj2_Q13921_16S_515F926R_20210701_taxa_absolute_relative
+unzip ./RBRA_proj2_Q13921_16S_515F926R_20210701_taxa_barplot.qzv -d ./RBRA_proj2_Q13921_16S_515F926R_20210701_taxa_absolute_relative
+echo RBRA_proj2_Q13921_16S_515F926R_20210701 > ./RBRA_proj2_Q13921_16S_515F926R_20210701_taxa_absolute_relative/RBRA_proj2_Q13921_16S_515F926R_20210701.id
+find . -type f -name 'level-7.csv' -exec sh -c 'for arg do cp -- "$arg" "./RBRA_proj2_Q13921_16S_515F926R_20210701_taxa_absolute_relative/"; done' _ {} +
+cd ./RBRA_proj2_Q13921_16S_515F926R_20210701_taxa_absolute_relative/
+cp /export2/home/microlab/microlab/python_scripts/qiime/transpose_csv_files.py ./RBRA_proj2_Q13921_16S_515F926R_20210701_taxa_absolute_relative/
+python3.6 ./RBRA_proj2_Q13921_16S_515F926R_20210701_taxa_absolute_relative/transpose_csv_files.py
+
+source deactivate

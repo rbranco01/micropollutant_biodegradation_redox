@@ -1,0 +1,131 @@
+#!/bin/bash
+#SBATCH --job-name=RBRA_proj2_Q13921_16S_515F926R_20210701
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=16
+
+source activate ~/miniconda3/envs/qiime2-2019.10
+
+cd /export2/home/microlab/microlab/qiime/illumina_data
+
+mkdir -p /export2/home/microlab/microlab/qiime/illumina_data/temp
+export TMPDIR=/export2/home/microlab/microlab/qiime/illumina_data/temp
+
+mkdir -p RBRA_proj2_Q13921_16S_515F926R_20210701
+
+mkdir -p RBRA_proj2_Q13921_16S_515F926R_20210701/raw_data
+
+qiime
+
+cp -u RBRA_proj2_Q13921_16S_515F926R_20210701*_bash_step_*.sh ./
+cd .
+
+qiime tools import \
+--type MultiplexedPairedEndBarcodeInSequence \
+--input-path ./raw_data \
+--output-path ./RBRA_proj2_Q13921_16S_515F926R_20210701_paired_end_sequences.qza
+
+qiime cutadapt demux-paired \
+--i-seqs ./RBRA_proj2_Q13921_16S_515F926R_20210701_paired_end_sequences.qza \
+--m-forward-barcodes-file ./RBRA_proj2_Q13921_16S_515F926R_20210701@metadata.txt \
+--m-forward-barcodes-column BarcodeSequence \
+--p-error-rate 0 \
+--o-per-sample-sequences ./RBRA_proj2_Q13921_16S_515F926R_20210701_demux.qza \
+--o-untrimmed-sequences ./RBRA_proj2_Q13921_16S_515F926R_20210701_untrimmed.qza \
+--verbose
+
+qiime demux summarize \
+--i-data ./RBRA_proj2_Q13921_16S_515F926R_20210701_demux.qza \
+--o-visualization ./RBRA_proj2_Q13921_16S_515F926R_20210701_demux.qzv 
+
+qiime cutadapt trim-paired \
+--i-demultiplexed-sequences ./RBRA_proj2_Q13921_16S_515F926R_20210701_demux.qza \
+--p-front-f GTGYCAGCMGCCGCGGTAA \
+--p-front-r CCGYCAATTYMTTTRAGTTT \
+--p-discard-untrimmed \
+--o-trimmed-sequences ./RBRA_proj2_Q13921_16S_515F926R_20210701_trimmed-demux-seqs.qza
+
+qiime demux summarize \
+--i-data ./RBRA_proj2_Q13921_16S_515F926R_20210701_trimmed-demux-seqs.qza \
+--o-visualization ./RBRA_proj2_Q13921_16S_515F926R_20210701_trimmed-demux-seqs.qzv 
+
+qiime dada2 denoise-paired \
+--i-demultiplexed-seqs ./RBRA_proj2_Q13921_16S_515F926R_20210701_trimmed-demux-seqs.qza \
+--p-trim-left-f 5 \
+--p-trim-left-r 5 \
+--p-trunc-len-f 240 \
+--p-trunc-len-r 210 \
+--o-table ./RBRA_proj2_Q13921_16S_515F926R_20210701_table.qza \
+--o-representative-sequences ./RBRA_proj2_Q13921_16S_515F926R_20210701_representative_sequences.qza \
+--o-denoising-stats ./RBRA_proj2_Q13921_16S_515F926R_20210701_denoising_stats.qza \
+--p-n-threads 16 
+
+qiime metadata tabulate \
+--m-input-file ./RBRA_proj2_Q13921_16S_515F926R_20210701_denoising_stats.qza \
+--o-visualization ./RBRA_proj2_Q13921_16S_515F926R_20210701_denoising_stats.qzv
+
+qiime feature-table summarize \
+--i-table ./RBRA_proj2_Q13921_16S_515F926R_20210701_table.qza \
+--m-sample-metadata-file ./RBRA_proj2_Q13921_16S_515F926R_20210701@metadata.txt \
+--o-visualization ./RBRA_proj2_Q13921_16S_515F926R_20210701_table.qzv
+
+qiime feature-table tabulate-seqs \
+--i-data ./RBRA_proj2_Q13921_16S_515F926R_20210701_representative_sequences.qza \
+--o-visualization ./RBRA_proj2_Q13921_16S_515F926R_20210701_representative_sequences.qzv
+
+qiime alignment mafft \
+--i-sequences ./RBRA_proj2_Q13921_16S_515F926R_20210701_representative_sequences.qza \
+--o-alignment ./RBRA_proj2_Q13921_16S_515F926R_20210701_aligned-rep-seqs.qza \
+--p-n-threads 16 
+
+qiime alignment mask \
+--i-alignment ./RBRA_proj2_Q13921_16S_515F926R_20210701_aligned-rep-seqs.qza \
+--o-masked-alignment ./RBRA_proj2_Q13921_16S_515F926R_20210701_masked_aligned-rep-seqs.qza
+
+qiime phylogeny fasttree \
+--i-alignment ./RBRA_proj2_Q13921_16S_515F926R_20210701_masked_aligned-rep-seqs.qza \
+--o-tree ./RBRA_proj2_Q13921_16S_515F926R_20210701_unrooted-tree.qza \
+--p-n-threads 16
+
+qiime phylogeny midpoint-root \
+--i-tree ./RBRA_proj2_Q13921_16S_515F926R_20210701_unrooted-tree.qza \
+--o-rooted-tree ./RBRA_proj2_Q13921_16S_515F926R_20210701_rooted-tree.qza
+
+qiime feature-classifier classify-sklearn \
+--i-classifier /export2/home/microlab/microlab/qiime_classifiers/NB_classifier_SILVA_132_99_16S_515F-926R_QIIME2-2019.10.qza \
+--i-reads ./RBRA_proj2_Q13921_16S_515F926R_20210701_representative_sequences.qza \
+--o-classification ./RBRA_proj2_Q13921_16S_515F926R_20210701_taxonomy_NB_classifier_SILVA_132_99_16S_515F-926R_QIIME2-2019.10.qza \
+--p-n-jobs 16
+
+qiime metadata tabulate \
+--m-input-file ./RBRA_proj2_Q13921_16S_515F926R_20210701_taxonomy_NB_classifier_SILVA_132_99_16S_515F-926R_QIIME2-2019.10.qza \
+--o-visualization ./RBRA_proj2_Q13921_16S_515F926R_20210701_taxonomy_NB_classifier_SILVA_132_99_16S_515F-926R_QIIME2-2019.10.qzv
+
+qiime tools export \
+--input-path ./RBRA_proj2_Q13921_16S_515F926R_20210701_representative_sequences.qza \
+--output-path .
+
+qiime tools export \
+--input-path ./RBRA_proj2_Q13921_16S_515F926R_20210701_table.qza \
+--output-path .
+
+qiime tools export \
+--input-path ./RBRA_proj2_Q13921_16S_515F926R_20210701_rooted-tree.qza \
+--output-path .
+
+qiime tools export \
+--input-path ./RBRA_proj2_Q13921_16S_515F926R_20210701_taxonomy_NB_classifier_SILVA_132_99_16S_515F-926R_QIIME2-2019.10.qza \
+--output-path ./
+
+mv ./dna-sequences.fasta ./RBRA_proj2_Q13921_16S_515F926R_20210701_dna-sequences.fasta
+mv ./feature-table.biom ./RBRA_proj2_Q13921_16S_515F926R_20210701_feature-table.biom
+mv ./tree.nwk ./RBRA_proj2_Q13921_16S_515F926R_20210701_tree.nwk
+mv ./taxonomy.tsv ./RBRA_proj2_Q13921_16S_515F926R_20210701_taxonomy.tsv
+
+unzip ./RBRA_proj2_Q13921_16S_515F926R_20210701_demux.qzv -d .
+find . -type f -name 'forward-seven-number-summaries.csv' -exec sh -c 'for arg do cp -- "$arg" "./RBRA_proj2_Q13921_16S_515F926R_20210701_forward-seven-number-summaries.csv"; done' _ {} +
+find . -type f -name 'reverse-seven-number-summaries.csv' -exec sh -c 'for arg do cp -- "$arg" "./RBRA_proj2_Q13921_16S_515F926R_20210701_reverse-seven-number-summaries.csv"; done' _ {} +
+unzip ./RBRA_proj2_Q13921_16S_515F926R_20210701_denoising_stats.qza -d .
+find . -type f -name 'stats.tsv' -exec sh -c 'for arg do cp -- "$arg" "./CHECK_RBRA_proj2_Q13921_16S_515F926R_20210701_stats.tsv"; done' _ {} +
+
+source deactivate
